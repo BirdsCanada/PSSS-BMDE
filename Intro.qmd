@@ -11,7 +11,7 @@ editor: visual
 ### Quick Data Overview
 
 | Data        | Puget Sound Seabird Survey (PSSS)                                        |
-|-----------------|-------------------------------------------------------|
+|------------------|------------------------------------------------------|
 | Owner       | Seattle Audubon/ Puget Sound Bird Observatory                            |
 | Status      | Active                                                                   |
 | Years       | 2008 - present                                                           |
