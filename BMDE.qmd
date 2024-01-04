@@ -6,36 +6,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-### Data Schema 
-
-The purpose of this chapter is to provide the data user R script which
-will enable the compilation of disparate avian data sources into a
-standardized format (also known as a schema). The format selected for
-the purposes of this project was the Bird Monitoring Data Exchange
-([BMDE](https://naturecounts.ca/nc/default/nc_bmde.jsp)), which is the
-core standard of
-[NatureCounts](https://naturecounts.ca/nc/default/main.jsp) a node of
-the [Avian Knowledge Network](https://avianknowledge.net/). The BMDE
-includes 169 core fields for capturing all metric and descriptors
-associated with bird observations. You can use the naturecounts R
-package and the following scripts to view the BMDE core fields. A copy
-of the BMDE table is also in the `BMDE` folder of this directory, which
-provides additional descriptions of the core columns.
-
-``` {r}
-BMDE<-meta_bmde_fields("core")
-```
-
-Any data owners wishing to contribute their data to the NatureCounts
-database should complete the metadata form, also found in the BMDE
-folder, and reach out to Catherine Jardin:
-[cjardine\@birdscanada.org](mailto:cjardine@birdscanada.org){.email},
-Birds Canada's Data Analyst.
-
-The raw PSSS data will be received in .xlsx format. Save a copy in the PSSS `Data` folder in .csv format. Assuming no changes have been made, the follow script will prepare and format the data. 
-
-
-``` {r}
+```{r}
 #install.packages("remotes")
 #remotes::install_github("BirdsCanada/naturecounts")
 
@@ -47,15 +18,23 @@ library(reshape)
 library(measurements)
 ```
 
+### Data Schema
+
+The purpose of this chapter is to provide the data user R script which will enable the compilation of disparate avian data sources into a standardized format (also known as a schema). The format selected for the purposes of this project was the Bird Monitoring Data Exchange ([BMDE](https://naturecounts.ca/nc/default/nc_bmde.jsp)), which is the core standard of [NatureCounts](https://naturecounts.ca/nc/default/main.jsp) a node of the [Avian Knowledge Network](https://avianknowledge.net/). The BMDE includes 169 core fields for capturing all metric and descriptors associated with bird observations. You can use the naturecounts R package and the following scripts to view the BMDE core fields. A copy of the BMDE table is also in the `BMDE` folder of this directory, which provides additional descriptions of the core columns.
+
+```{r}
+BMDE<-meta_bmde_fields("core")
+```
+
+Any data owners wishing to contribute their data to the NatureCounts database should complete the metadata form, also found in the BMDE folder, and reach out to Catherine Jardin: [cjardine\@birdscanada.org](mailto:cjardine@birdscanada.org){.email}, Birds Canada's Data Analyst.
+
+The raw PSSS data will be received in .xlsx format. Save a copy in the PSSS `Data` folder in .csv format. Assuming no changes have been made, the follow script will prepare and format the data.
 
 ### Species Codes
 
-A crucial steps to combining datasets is the inclusion of a common
-species code. Let's compile the complete species list now for use later
-in the data compilation. The data tables you will need can be accessed
-using the naturecounts R package.
+A crucial steps to combining datasets is the inclusion of a common species code. Let's compile the complete species list now for use later in the data compilation. The data tables you will need can be accessed using the naturecounts R package.
 
-``` {r}
+```{r}
 sp.code<-meta_species_codes()
 sp.code<-sp.code %>% filter(authority=="BSCDATA") %>% select(-authority, -species_id2, -rank) %>% distinct()
 
@@ -66,37 +45,19 @@ sp<-left_join(sp.code, sp.tax, by="species_id")
 sp<-sp %>% distinct(english_name, .keep_all = TRUE)
 ```
 
-### Data Manipulation 
+### Data Manipulation
 
-All data sets need to be manipulated before they are used for an
-analysis. Anyone that uses big datasets for research will tell you that
-it often takes more time to manipulate and filter the data than doing
-the actual statistical analysis. I therefore cannot cover all the
-possible data manipulations you will do, but will give you some sample
-script to help compile a contemporary dataset of birds using the
-tansboundary waters of the Salish Sea.
+All data sets need to be manipulated before they are used for an analysis. Anyone that uses big datasets for research will tell you that it often takes more time to manipulate and filter the data than doing the actual statistical analysis. I therefore cannot cover all the possible data manipulations you will do, but will give you some sample script to help compile a contemporary dataset of birds using the tansboundary waters of the Salish Sea.
 
-There are data column in the raw dataset that are not carried over to
-the BMDE. We do retain any information which could be used for effort
-correction, but some auxiliary data is lost which could bee used if
-developing a occupancy model. If you are a data user, you should inspect
-the raw data columns to ensure there is nothing that you need dropped
-from the final datatable. You can change the code below to retain
-additional columns as needed.
+There are data column in the raw dataset that are not carried over to the BMDE. We do retain any information which could be used for effort correction, but some auxiliary data is lost which could bee used if developing a occupancy model. If you are a data user, you should inspect the raw data columns to ensure there is nothing that you need dropped from the final datatable. You can change the code below to retain additional columns as needed.
 
-### Format PSSS 
+### Format PSSS
 
-The data will be received in an .xlsx file. Save as a .csv in the `Data`
-folder for processing using the following scripts. We will work with the
-sample dataset here which has the same formatting as the full dataset
-that you will receive.
+The data will be received in an .xlsx file. Save as a .csv in the `Data` folder for processing using the following scripts. We will work with the sample dataset here which has the same formatting as the full dataset that you will receive.
 
-Note: the sample dataframe is 50 rows long, but the output dataframe
-will be 65. How can this be!? This is because the raptors are recorded
-in rows with the other data and are extracted into their own rows to
-match the BMDE. This makes the data frame longer.
+Note: the sample dataframe is 50 rows long, but the output dataframe will be 65. How can this be!? This is because the raptors are recorded in rows with the other data and are extracted into their own rows to match the BMDE. This makes the data frame longer.
 
-``` {r}
+```{r}
 
 PSSS<-read.csv("Data/PSSS_2008-2023.csv")
 
@@ -178,8 +139,9 @@ PSSS<-PSSS[BMDE_col]
 ```
 
 #Write Output
+
 ```{r}
 
-write.csv(PSSS, "Output/PSSS_BMDE.csv")
+write.csv(PSSS, "Output/PSSS_BMDE.csv", row.names = FALSE, quote=FALSE)
 
 ```
