@@ -114,7 +114,7 @@ PSSS<-merge(PSSS, sp, by.x=c("common_name"), by.y= ("english_name"), all.x=TRUE)
 #rename data columns to match BMDE
 PSSS<-PSSS %>% dplyr::rename(CommonName =common_name, SurveyAreaIdentifier= survey_site_id, Locality = site_name, MinimumElevationInMeters=elevation, MaximumElevationInMeters=elevation, TimeObservationsStarted=start_time, TimeCollected = start_time, TimeObservationsEnded=end_time, ObservationCount = bird_count, ObservationCount2=large_flock_best, ObsCountAtLeast = large_flock_min, ObsCountAtMost = large_flock_max, FieldNotes=notes, Collector = name, ScientificName=scientific_name, SpeciesCode=species_code, AllSpeciesReported=is_complete)
 
-PSSS$RouteIdentifier<-PSSS$Locality
+PSSS$RouteIdentifier<-PSSS$SurveyAreaIdentifier
 PSSS$BasisOfRecord <- "Observation"
 PSSS$CollectionCode <- "PSSS"
 PSSS$Continent <-"North America"
@@ -131,12 +131,28 @@ PSSS$ObservationDescriptor2 = "Large flock best estiamte"
 #Now that we have specified all the data columns we can, we will create the BMDE standardized data table. 
 
 #Identify the missing columns of data
-BMDE_col<-unique(BMDE$local_name)
+#BMDE_col<-unique(BMDE$local_name)
 
-missing<-setdiff(BMDE_col, names(PSSS))
-PSSS[missing]<-" "
-PSSS<-PSSS[BMDE_col]
+#missing<-setdiff(BMDE_col, names(PSSS))
+#PSSS[missing]<-""
+#PSSS<-PSSS[BMDE_col]
 ```
+
+Now you need to make some extra tweaks for the NatureCounts upload tool
+
+```{r final clean}
+
+PSSS$InstitutionCode<-"PSBO"
+PSSS<-PSSS %>% mutate(CatalogNumber = paste0(RouteIdentifier, "-", SpeciesCode, "-", YearCollected, sep=""))
+PSSS<-PSSS %>% mutate(GlobalUniqueIdentifier = paste0("URN:catalog:", InstitutionCode, ":", CollectionCode, ":", CatalogNumber, sep=""))
+PSSS<-PSSS %>% mutate(ObservationDate = paste0(YearCollected, "-", MonthCollected, "-", DayCollected, sep=""))
+PSSS$DecimalLatitude<-round(PSSS$DecimalLatitude, 10)
+PSSS$DecimalLongitude<-round(PSSS$DecimalLongitude, 10)
+
+PSSS<-PSSS %>% select(-position, -zero_ref_point, -weather, -precipitation, -sea_state, -tide_movement, -visibility_distance, -poor_visibility_reason, -poor_visibility_reason_other, -equipment, -walker_count, -dog_count, -power_boat_count, -unpowered_boat_count, -other_activities_name, -other_activities_count, -SurveyComments, -horizon_obscured, -bird_name, -survey_id, -SiteComments, -is_verifier, -eye_height, -arm_length, -binocular_magnification, -scope_magnification, -lat, -long, -species_id, -no_measurements)
+
+```
+
 
 #Write Output
 
