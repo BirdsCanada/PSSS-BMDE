@@ -149,10 +149,9 @@ PSSS<-PSSS %>% mutate(ObservationDate = paste0(YearCollected, "-", MonthCollecte
 PSSS$DecimalLatitude<-round(PSSS$DecimalLatitude, 10)
 PSSS$DecimalLongitude<-round(PSSS$DecimalLongitude, 10)
 
-PSSS<-PSSS %>% select(-position, -zero_ref_point, -weather, -precipitation, -sea_state, -tide_movement, -visibility_distance, -poor_visibility_reason, -poor_visibility_reason_other, -equipment, -walker_count, -dog_count, -power_boat_count, -unpowered_boat_count, -other_activities_name, -other_activities_count, -SurveyComments, -horizon_obscured, -bird_name, -survey_id, -SiteComments, -is_verifier, -eye_height, -arm_length, -binocular_magnification, -scope_magnification, -lat, -long, -species_id, -no_measurements)
+PSSS<-PSSS %>% select(-position, -zero_ref_point, -weather, -precipitation, -sea_state, -tide_movement, -visibility_distance, -poor_visibility_reason, -poor_visibility_reason_other, -equipment, -walker_count, -dog_count, -power_boat_count, -unpowered_boat_count, -other_activities_name, -other_activities_count, -SurveyComments, -horizon_obscured, -bird_name, -survey_id, -SiteComments, -is_verifier, -eye_height, -arm_length, -binocular_magnification, -scope_magnification, -lat, -long, -species_id, -no_measurements, -FieldNotes)
 
 ```
-
 
 #Write Output
 
