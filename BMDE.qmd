@@ -61,6 +61,15 @@ Note: the sample dataframe is 50 rows long, but the output dataframe will be 65.
 
 PSSS<-read.csv("Data/PSSS_2008-2023.csv")
 
+#remove birds that are outside survey area (>300m)
+PSSS <- PSSS %>%
+  mutate(bearing = case_when(bearing == "" ~ NA, .default = bearing)) %>%
+  mutate(within_survey_area = case_when(is.na(bearing) == FALSE & is.na(dist) == FALSE & is.na(bird_count) == FALSE ~ TRUE,
+                                        horizon_obscured == 1 & is.na(bird_count) == FALSE ~ TRUE,
+                                        is.na(bearing) == FALSE & is.na(dist) == TRUE & is.na(bird_count) == FALSE ~ TRUE,
+                                        is.na(bearing) == TRUE & is.na(dist) == FALSE & is.na(bird_count) == FALSE ~ TRUE,
+                                        .default = FALSE)) %>% filter(is_complete == 1) %>% filter(within_survey_area==TRUE) %>% select(-within_survey_area)
+
 PSSS$lat<-sub(" W.*", "", PSSS$position)  
 PSSS$long<-sub(".*W", "", PSSS$position)
 
@@ -112,7 +121,7 @@ PSSS<-PSSS %>% mutate(common_name = ifelse(common_name == "Thayer's Gull", "Ivor
 PSSS<-merge(PSSS, sp, by.x=c("common_name"), by.y= ("english_name"), all.x=TRUE)
   
 #rename data columns to match BMDE
-PSSS<-PSSS %>% dplyr::rename(CommonName =common_name, SurveyAreaIdentifier= survey_site_id, Locality = site_name, MinimumElevationInMeters=elevation, MaximumElevationInMeters=elevation, TimeObservationsStarted=start_time, TimeCollected = start_time, TimeObservationsEnded=end_time, ObservationCount = bird_count, ObservationCount2=large_flock_best, ObsCountAtLeast = large_flock_min, ObsCountAtMost = large_flock_max, FieldNotes=notes, Collector = name, ScientificName=scientific_name, SpeciesCode=species_code, AllSpeciesReported=is_complete)
+PSSS<-PSSS %>% dplyr::rename(CommonName =common_name, SurveyAreaIdentifier= survey_site_id, Locality = site_name, MinimumElevationInMeters=elevation, MaximumElevationInMeters=elevation, TimeCollected = start_time, TimeObservationsEnded=end_time, ObservationCount = bird_count, ObservationCount2=large_flock_best, ObsCountAtLeast = large_flock_min, ObsCountAtMost = large_flock_max, FieldNotes=notes, Collector = name, ScientificName=scientific_name, SpeciesCode=species_code, AllSpeciesReported=is_complete)
 
 PSSS$RouteIdentifier<-PSSS$SurveyAreaIdentifier
 PSSS$BasisOfRecord <- "Observation"
@@ -127,15 +136,17 @@ PSSS$SurveyAreaShape = "300 m"
 #PSSS$EffortUnit1 = "Party-hours"
 PSSS$ObservationDescriptor = "Total Count"
 PSSS$ObservationDescriptor2 = "Large flock best estiamte" 
+PSSS$TimeObservationsStarted=PSSS$TimeCollected
+PSSS$DurationInHours=(PSSS$TimeObservationsEnded-PSSS$TimeObservationsStarted)/60
 
 #Now that we have specified all the data columns we can, we will create the BMDE standardized data table. 
 
 #Identify the missing columns of data
-#BMDE_col<-unique(BMDE$local_name)
+BMDE_col<-unique(BMDE$local_name)
 
-#missing<-setdiff(BMDE_col, names(PSSS))
-#PSSS[missing]<-""
-#PSSS<-PSSS[BMDE_col]
+missing<-setdiff(BMDE_col, names(PSSS))
+PSSS[missing]<-""
+PSSS<-PSSS[BMDE_col]
 ```
 
 Now you need to make some extra tweaks for the NatureCounts upload tool
@@ -149,7 +160,7 @@ PSSS<-PSSS %>% mutate(ObservationDate = paste0(YearCollected, "-", MonthCollecte
 PSSS$DecimalLatitude<-round(PSSS$DecimalLatitude, 10)
 PSSS$DecimalLongitude<-round(PSSS$DecimalLongitude, 10)
 
-PSSS<-PSSS %>% select(-position, -zero_ref_point, -weather, -precipitation, -sea_state, -tide_movement, -visibility_distance, -poor_visibility_reason, -poor_visibility_reason_other, -equipment, -walker_count, -dog_count, -power_boat_count, -unpowered_boat_count, -other_activities_name, -other_activities_count, -SurveyComments, -horizon_obscured, -bird_name, -survey_id, -SiteComments, -is_verifier, -eye_height, -arm_length, -binocular_magnification, -scope_magnification, -lat, -long, -species_id, -no_measurements, -FieldNotes)
+#PSSS<-PSSS %>% select(-position, -zero_ref_point, -weather, -precipitation, #-sea_state, -tide_movement, -visibility_distance, -poor_visibility_reason, -poor_visibility_reason_other, -equipment, -walker_count, -dog_count, -power_boat_count, -unpowered_boat_count, -other_activities_name, -other_activities_count, -SurveyComments, -horizon_obscured, -bird_name, -survey_id, -SiteComments, -is_verifier, -eye_height, -arm_length, -binocular_magnification, -scope_magnification, -lat, -long, -species_id, -no_measurements, -FieldNotes)
 
 ```
 
